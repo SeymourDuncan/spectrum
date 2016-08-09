@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>ConnectorView.qml</file>
+        <file>TextItemBorder.qml</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file alias="connect.png">icons/connect-your-database.png</file>
+        <file alias="title.png">icons/title.png</file>
+    </qresource>
+</RCC>

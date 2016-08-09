@@ -1,0 +1,7 @@
+*.user
+\debug
+\release
+\plugins
+Makefile
+Makefile.Release
+Makefile.Debug
