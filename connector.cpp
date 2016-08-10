@@ -1,7 +1,8 @@
 #include "connector.h"
+#include <QtSql/QSqlDatabase>
+#include "constanthelper.h"
 
-ConnectionSettings::ConnectionSettings(const QString host, const QString port, const QString user,
-                       const QString password, const QString database, QObject* parent/* = nullptr*/):
+DBConnector::DBConnector(const QString host, const QString port, const QString user, const QString password, const QString database, QObject* parent/* = nullptr*/):
         m_sHost(host),
         m_sPort(port),
         m_sUser(user),
@@ -11,44 +12,52 @@ ConnectionSettings::ConnectionSettings(const QString host, const QString port, c
 
 }
 
-bool ConnectionSettings::doConnect(){
+bool DBConnector::doConnect(){
     emit dataChanged();
+    QSqlDatabase db =  QSqlDatabase::addDatabase("QMYSQL", ConstantsHelper::CONNECTION_NAME);
+    db.setDatabaseName(m_sDatabase);
+    db.setUserName(m_sUser);
+    db.setPassword(m_sPassword);
+    db.setHostName(m_sHost);
+    db.setPort(m_sPort.toInt());
+
+    if(!db.open()){
+        emit connectionStatusChanged(false);
+        return false;
+    }
+
+    emit connectionStatusChanged(true);
     return true;
 }
 
-void ConnectionSettings::doDisconnect(){
-    emit disconnect();
-}
-
-
-QString ConnectionSettings::Host() const{
+QString DBConnector::Host() const{
     return m_sHost;
 }
-QString ConnectionSettings::Port() const{
+QString DBConnector::Port() const{
     return m_sPort;
 }
-QString ConnectionSettings::User() const{
+QString DBConnector::User() const{
     return m_sUser;
 }
-QString ConnectionSettings::Password() const{
+QString DBConnector::Password() const{
     return m_sPassword;
 }
-QString ConnectionSettings::Database() const{
+QString DBConnector::Database() const{
     return m_sDatabase;
 }
 
-void ConnectionSettings::setHost(const QString& value){
+void DBConnector::setHost(const QString& value){
     m_sHost = value;
 }
-void ConnectionSettings::setPort(const QString& value){
+void DBConnector::setPort(const QString& value){
     m_sPort = value;
 }
-void ConnectionSettings::setUser(const QString& value){
+void DBConnector::setUser(const QString& value){
     m_sUser = value;
 }
-void ConnectionSettings::setPassword(const QString& value){
+void DBConnector::setPassword(const QString& value){
     m_sPassword = value;
 }
-void ConnectionSettings::setDatabase(const QString& value){
+void DBConnector::setDatabase(const QString& value){
     m_sDatabase = value;
 }

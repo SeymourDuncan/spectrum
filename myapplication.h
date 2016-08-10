@@ -5,13 +5,15 @@
 #include <QSettings>
 #include <QQmlApplicationEngine>
 #include "connector.h"
+#include "modeldata.h"
 
 class MyApplication: public QApplication{
 Q_OBJECT
 private:
     QSettings* m_pSettings;
-    ConnectionSettings* m_pConnSettings;
+    DBConnector* m_pConnSettings;
     QQmlApplicationEngine* m_pEngine;
+    DataModel* m_pModel;
 public:
     MyApplication(int& argc, char** argv,
                   const QString& strOrg, const QString strAppname);

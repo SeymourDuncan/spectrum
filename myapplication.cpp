@@ -23,7 +23,7 @@ QSettings* MyApplication::GetSettings(){
 void MyApplication::LoadConnectionSettings(){
     m_pSettings->beginGroup("/Settings");
         m_pSettings->beginGroup("/Connection");
-            m_pConnSettings = new ConnectionSettings(m_pSettings->value("Host", "").toString(),
+            m_pConnSettings = new DBConnector(m_pSettings->value("Host", "").toString(),
                                                          m_pSettings->value("Port", "").toString(),
                                                          m_pSettings->value("User", "").toString(),
                                                          m_pSettings->value("Password", "").toString(),

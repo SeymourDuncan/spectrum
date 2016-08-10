@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QDebug>
 
-class ConnectionSettings: public QObject{
+class DBConnector: public QObject{
 Q_OBJECT
     Q_PROPERTY(QString Host READ Host WRITE setHost)
     Q_PROPERTY(QString Port READ Port WRITE setPort)
@@ -12,12 +12,9 @@ Q_OBJECT
     Q_PROPERTY(QString Password READ Password WRITE setPassword)
     Q_PROPERTY(QString Database READ Database WRITE setDatabase)
 public:
-
-    ConnectionSettings(const QString host, const QString port, const QString user,
-                       const QString password, const QString database, QObject* parent = nullptr);
+    DBConnector(const QString host, const QString port, const QString user, const QString password, const QString database, QObject* parent = nullptr);
 public:
     Q_INVOKABLE bool doConnect();
-    Q_INVOKABLE void doDisconnect();
 public:
     QString Host() const;
     QString Port() const;
@@ -38,7 +35,7 @@ private:
     QString m_sDatabase;    
 signals:
     void dataChanged();
-    void disconnect();
+    void connectionStatusChanged(bool);
 };
 
 #endif // CONNECTOR_H

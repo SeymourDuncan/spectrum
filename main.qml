@@ -27,22 +27,6 @@ ApplicationWindow {
             connectorView.visible = true;            
     }
 
-    Action{
-        id: disconnectDBAct
-        text: "Disconnect"
-        enabled: false
-        onTriggered: {
-            ConnectionData.doDisconnect();
-            disconnectDBAct.enabled = false;
-        }
-    }
-    Connections{
-        target: connectorView
-        onConnected: {
-            disconnectDBAct.enabled = true;
-        }
-    }
-
     menuBar: MenuBar{
         Menu{
             id: dbMenu
@@ -80,6 +64,7 @@ ApplicationWindow {
             }
         }
     }
+
 
     ConnectorView{
         id: connectorView
