@@ -11,7 +11,7 @@ class MyApplication: public QApplication{
 Q_OBJECT
 private:
     QSettings* m_pSettings;
-    DBConnector* m_pConnSettings;
+    DBConnector* m_pDBConnector;
     QQmlApplicationEngine* m_pEngine;
     DataModel* m_pModel;
 public:
@@ -23,14 +23,18 @@ public:
         return (MyApplication*)  qApp;
     }
 
+    void Init();
     void SetQmlEngine(QQmlApplicationEngine*);
     void SetDefaultContext();
-    QSettings* GetSettings();
-
+    QSettings* GetSettings();    
 public slots:
     void SaveConnectionSettings();
 
 private:
    void LoadConnectionSettings();
+
+signals:
+   void startBusy();
+   void finishBusy();
 };
 #endif // MYAPPLICATION_H

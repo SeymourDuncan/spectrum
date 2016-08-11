@@ -36,9 +36,6 @@ ApplicationWindow {
             MenuItem {
                 action: connectDBAct
             }
-            MenuItem {
-                action: disconnectDBAct
-            }
         }
     }
 
@@ -62,45 +59,63 @@ ApplicationWindow {
                 id: sbLabel
                 text: "Start working with connect to Database"
             }
-        }
+        }       
     }
 
+        Connections{
+            target: DBConnector
+            onConnectionStatusChanged : {
+                if (val){
+                    statusBar.text = "Connected"
+                }
+                else{
+                    statusBar.text = "Connection failed"
+                }
+            }
+        }
 
     ConnectorView{
         id: connectorView
         objectName: "connectorView"
         visible: false;
 
-        signal connected();
-
         function setValuesToDef(){
-            host = ConnectionData.Host;
-            port = ConnectionData.Port;
-            dbName = ConnectionData.Database;
-            user = ConnectionData.User;
-            password = ConnectionData.Password;
+            host = DBConnector.Host;
+            port = DBConnector.Port;
+            dbName = DBConnector.Database;
+            user = DBConnector.User;
+            password = DBConnector.Password;
         }
 
         onAccepted: {
-            ConnectionData.Host = host;
-            ConnectionData.Port = port;
-            ConnectionData.Database = dbName;
-            ConnectionData.User = user;
-            ConnectionData.Password = password;
-
-            if (ConnectionData.doConnect()){
-                connected();
-                statusBar.text = "Connected"
-            }
-            else{
-                statusBar.text = "Connection failed"
-            }
+            DBConnector.Host = host;
+            DBConnector.Port = port;
+            DBConnector.Database = dbName;
+            DBConnector.User = user;
+            DBConnector.Password = password;
+            DBConnector.tryConnect();
         }
 
         onVisibleChanged: {
             if (visible){
                 setValuesToDef();
             }
+        }
+    }
+
+    BusyIndicator{
+        id: mainBzIndicator
+        anchors.centerIn: parent
+        running: false
+    }
+    Connections{
+        target: ApplicationContext
+        onStartBusy:
+        {
+            mainBzIndicator.running = true
+        }
+        onFinishBusy: {
+            mainBzIndicator.running = false
         }
     }
 
