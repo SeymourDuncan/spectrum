@@ -25,23 +25,6 @@ struct ConnectionData{
     QString m_sDatabase;
 };
 
-class ConnectionWorker: public QObject{
-Q_OBJECT
-public:
-    ConnectionWorker(const ConnectionData& data): QObject(nullptr) {
-        m_Data = data;
-    }
-public slots:
-    void process();
-
-signals:
-    void finished();
-    void fireResult(bool rez);
-public:
-    ConnectionData m_Data;
-};
-
-
 class DBConnector: public QObject{
 Q_OBJECT
     Q_PROPERTY(QString Host READ Host WRITE setHost)

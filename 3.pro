@@ -7,7 +7,8 @@ SOURCES += main.cpp \
     myapplication.cpp\
     connector.cpp \
     constanthelper.cpp \
-    modeldata.cpp
+    modeldata.cpp \
+    dbthread.cpp
 
 
 RESOURCES += qml.qrc
@@ -24,6 +25,7 @@ HEADERS += \
     myapplication.h \
     connector.h \
     constanthelper.h \
-    modeldata.h
+    modeldata.h \
+    dbthread.h
 
 
