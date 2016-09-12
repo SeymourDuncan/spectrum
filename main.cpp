@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine* engine = new QQmlApplicationEngine();
     app.SetQmlEngine(engine);
-    engine->load(QUrl(QStringLiteral("qrc:/main.qml")));
+    engine->load(QUrl(QStringLiteral("qrc:/resources/main.qml")));
 
     app.Init();
 

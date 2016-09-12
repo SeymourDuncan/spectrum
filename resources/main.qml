@@ -3,15 +3,19 @@ import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.3
 
-
 ApplicationWindow {
     id: mainWindow
     objectName: "mainWindow"
     visible: true
-    width: 500
+    width: 700
     height: 700
     title: "Spectrum"
 
+    SpectrumView{
+//        anchors.fill: parent
+        width: 500
+        height: 400
+    }
 
     style: ApplicationWindowStyle {
            background: BorderImage {
@@ -22,7 +26,7 @@ ApplicationWindow {
     Action{
         id: connectDBAct
         text: "Connect"
-        iconSource: "icons/connect.png"
+        iconSource: "/resources/icons/connect-your-database.png"
         onTriggered:
             connectorView.visible = true;            
     }
@@ -62,17 +66,17 @@ ApplicationWindow {
         }       
     }
 
-        Connections{
-            target: DBConnector
-            onConnectionStatusChanged : {
-                if (val){
-                    statusBar.text = "Connected"
-                }
-                else{
-                    statusBar.text = "Connection failed"
-                }
+    Connections{
+        target: DBConnector
+        onConnectionStatusChanged : {
+            if (val){
+                statusBar.text = "Connected"
+            }
+            else{
+                statusBar.text = "Connection failed"
             }
         }
+    }
 
     ConnectorView{
         id: connectorView

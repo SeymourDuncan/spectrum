@@ -1,11 +1,11 @@
 <RCC>
     <qresource prefix="/">
-        <file>main.qml</file>
-        <file>ConnectorView.qml</file>
-        <file>TextItemBorder.qml</file>
-    </qresource>
-    <qresource prefix="/icons">
-        <file alias="connect.png">icons/connect-your-database.png</file>
-        <file alias="title.png">icons/title.png</file>
+        <file>resources/controls/TextItemBorder.qml</file>
+        <file>resources/controls/VerticalView.qml</file>
+        <file>resources/icons/connect-your-database.png</file>
+        <file>resources/icons/title.png</file>
+        <file>resources/ConnectorView.qml</file>
+        <file>resources/main.qml</file>
+        <file>resources/SpectrumView.qml</file>
     </qresource>
 </RCC>

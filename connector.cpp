@@ -3,26 +3,6 @@
 #include "myapplication.h"
 #include "dbthread.h"
 
-//void ConnectionWorker::process(){
-//    if (QSqlDatabase::contains(ConstantsHelper::CONNECTION_NAME)){
-//        QSqlDatabase::removeDatabase(ConstantsHelper::CONNECTION_NAME);
-//    }
-
-//    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL", ConstantsHelper::CONNECTION_NAME);
-
-//    db.setDatabaseName(m_Data.m_sDatabase);
-//    db.setUserName(m_Data.m_sUser);
-//    db.setPassword(m_Data.m_sPassword);
-//    db.setHostName(m_Data.m_sHost);
-//    db.setPort(m_Data.m_sPort.toInt());
-
-//    bool rez = db.open();
-
-//    emit fireResult(rez);
-//    emit finished();
-//}
-
-
 DBConnector::DBConnector(const QString host, const QString port, const QString user, const QString password, const QString database, QObject* parent/* = nullptr*/):
         m_connData(host, port, user, password, database),
         m_bDataChanged(false),
