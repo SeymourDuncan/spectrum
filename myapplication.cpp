@@ -2,22 +2,31 @@
 #include <QQuickWindow>
 #include <QQmlContext>
 
-
-
 MyApplication::MyApplication(int& argc, char** argv,
             const QString& strOrg, const QString strAppname)
-            : QApplication(argc, argv), m_pSettings(0){
+            : QApplication(argc, argv), m_pSettings(0), m_bDataLoaded(false){
 
     setOrganizationName(strOrg);
     setApplicationName(strAppname);
     // инициализируем объект настроек. TODO: менеджер настроек?
     m_pSettings = new QSettings(strOrg, strAppname, this);
-    // грузим настройки подключения из реестра
+
+    // грузим настройки подключения из реестра и создаем коннектор
     LoadConnectionSettings();
+    // создаем модель данных
+    m_pModel = new DataModel(this);
 }
 
 void MyApplication::Init(){
     m_pDBConnector->RunConnect();
+}
+
+DataModel* MyApplication::GetData(){
+    if (!m_bDataLoaded){
+        m_pModel->LoadData();
+    }
+    m_bDataLoaded = true;
+    return m_pModel;
 }
 
 QSettings* MyApplication::GetSettings(){
@@ -56,15 +65,17 @@ void MyApplication::SetDefaultContext(){
     if (!m_pDBConnector)
         return;
 
+// для работы с подключением
     m_pEngine->rootContext()->setContextProperty("DBConnector", m_pDBConnector);
+// для вызова startBuzy
     m_pEngine->rootContext()->setContextProperty("ApplicationContext", this);
+//  данные из БД
+    m_pEngine->rootContext()->setContextProperty("DataContainerContext", m_pModel);
 }
 
 void MyApplication::SetQmlEngine(QQmlApplicationEngine* engine){
     m_pEngine = engine;   
-    SetDefaultContext();
-    // пока соединю тут контекст
-//    QQuickWindow* item = qobject_cast<QQuickWindow *>(engine->rootObjects().first());
+    SetDefaultContext();        
 }
 
 

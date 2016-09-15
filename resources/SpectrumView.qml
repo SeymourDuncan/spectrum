@@ -4,10 +4,25 @@ import QtQuick.Layouts 1.1
 import "controls"
 
 Item {
+    property var context: null
+    signal updateContext(bool val);
+
+    onUpdateContext: {
+        if (!context)
+            return;
+        if (val){
+            cbSystem.model = context.GetSystemList()
+            cbSystem.activated(0);
+        }
+        else{
+            cbSystem.currentIndex = -1
+            cbSystem.model = null
+        }
+
+    }
+
     GroupBox{
         title: "Data view"
-//        title: height + ':' + implicitHeight
-//        title: width + ':' + implicitWidth
         anchors.fill: parent
         clip: true
         GridLayout{
@@ -34,49 +49,50 @@ Item {
                     implicitHeight += 7;
                 }
                 Grid{
-                    //Component.onCompleted: console.log(implicitHeight)
                     anchors.top: parent.top
                     anchors.topMargin: 7
                     columns: 2
                     rows: 3
                     spacing: 10
+
                     Label{
                         text: "System:"
                     }
+                    // Система
                     ComboBox{
                         id: cbSystem
                         height: 25
-                        model: ListModel {
-                                  id: model1
-                                  ListElement { text: "Banana";}
-                                  ListElement { text: "Apple"; }
-                                  ListElement { text: "Coconut";}
-                        }
                     }
                     Label{
                         text: "Class:"
                     }
+                    // Класс
                     ComboBox{
                         id: cbClass
                         height: 25
-                        model: ListModel {
-                                  id: model2
-                                  ListElement { text: "Banana";}
-                                  ListElement { text: "Apple"; }
-                                  ListElement { text: "Coconut";}
+                        Connections{
+                            target: cbSystem
+                            onActivated:{
+                                cbClass.currentIndex = -1
+                                cbClass.model = context.GetClassesBySystem(index);
+                                cbClass.activated(0);
+                            }
                         }
                     }
                     Label{
                         text: "Object:"
                     }
+
+                    // Объект
                     ComboBox{
                         id: cbObject
                         height: 25
-                        model: ListModel {
-                                  id: model3
-                                  ListElement { text: "Banana";}
-                                  ListElement { text: "Apple"; }
-                                  ListElement { text: "Coconut";}
+                        Connections{
+                            target: cbClass
+                            onActivated:{
+                                cbObject.currentIndex = -1
+                                cbObject.model = context.GetObjectsByClass(index);
+                            }
                         }
                     }
                 }

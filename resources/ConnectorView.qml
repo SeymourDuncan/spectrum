@@ -11,7 +11,6 @@ Dialog{
     visible: false
     title: "Connection to DB..."
 
-
     property alias host: tiHost.text
     property alias port: tiPort.text
     property alias dbName: tiDB.text
@@ -81,8 +80,6 @@ Dialog{
                 connectorView.password = tiPassword.text;
             }
         }
-
-
    }
 
     standardButtons: StandardButton.Ok | StandardButton.Cancel

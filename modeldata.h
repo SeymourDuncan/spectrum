@@ -4,6 +4,7 @@
 #include <QObject>
 #include "modeldata.h"
 #include <memory>
+#include <QStringList>
 
 class SpectrumObject;
 class SpectrumClass;
@@ -18,12 +19,21 @@ typedef std::vector<SpectrumSystem*> SpectrumSystemVector;
 class DataModel: public QObject{
     Q_OBJECT
 public:
-    DataModel(QObject* parent = nullptr): QObject(parent){
+    DataModel(QObject* parent = nullptr): QObject(parent), m_bIsLoaded(false),
+    m_dSelSys(-1), m_dSelClass(-1), m_dSelObj(-1)
+    {
 
     }
 private:
     bool m_bIsLoaded;
+    int m_dSelSys;
+    int m_dSelClass;
+    int m_dSelObj;
     SpectrumSystemVector m_vSpectrSystem;
+public:
+    Q_INVOKABLE QStringList GetSystemList();
+    Q_INVOKABLE QStringList GetClassesBySystem(int index);
+    Q_INVOKABLE QStringList GetObjectsByClass(int index);
 public:
      bool LoadData();
      SpectrumSystemVector GetSystemVector();
@@ -40,6 +50,7 @@ public:
 private:
     int m_dId;
     QString m_sName;
+
 public:
     int GetID();
     QString GetName();

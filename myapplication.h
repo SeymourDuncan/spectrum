@@ -24,6 +24,7 @@ public:
     }
 
     void Init();
+    DataModel* GetData();
     void SetQmlEngine(QQmlApplicationEngine*);
     void SetDefaultContext();
     QSettings* GetSettings();    
@@ -31,7 +32,8 @@ public slots:
     void SaveConnectionSettings();
 
 private:
-   void LoadConnectionSettings();
+    bool m_bDataLoaded;
+    void LoadConnectionSettings();
 
 signals:
    void startBusy();

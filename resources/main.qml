@@ -12,9 +12,23 @@ ApplicationWindow {
     title: "Spectrum"
 
     SpectrumView{
-//        anchors.fill: parent
+        id: spectrView
+
+        anchors.fill: parent
         width: 500
         height: 400
+
+        Component.onCompleted: {
+            context = DataContainerContext
+        }
+
+        Connections{
+            target: DBConnector
+            onConnectionStatusChanged : spectrView.updateContext(val)
+        }
+
+
+
     }
 
     style: ApplicationWindowStyle {
