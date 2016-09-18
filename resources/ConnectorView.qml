@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.0
 import QtQuick.Dialogs 1.2
+import "controls"
 
 Dialog{
     id: connectorView
@@ -9,7 +10,6 @@ Dialog{
     height: 250
     visible: false
     title: "Connection to DB..."
-
 
     property alias host: tiHost.text
     property alias port: tiPort.text
@@ -80,8 +80,6 @@ Dialog{
                 connectorView.password = tiPassword.text;
             }
         }
-
-
    }
 
     standardButtons: StandardButton.Ok | StandardButton.Cancel

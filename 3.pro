@@ -1,11 +1,14 @@
 TEMPLATE = app
 
-QT += widgets qml quick
+QT += widgets qml quick sql
 CONFIG += c++11
 
 SOURCES += main.cpp \
     myapplication.cpp\
-    connector.cpp
+    connector.cpp \
+    constanthelper.cpp \
+    modeldata.cpp \
+    dbthread.cpp
 
 
 RESOURCES += qml.qrc
@@ -20,6 +23,9 @@ DISTFILES +=
 
 HEADERS += \
     myapplication.h \
-    connector.h
+    connector.h \
+    constanthelper.h \
+    modeldata.h \
+    dbthread.h
 
 

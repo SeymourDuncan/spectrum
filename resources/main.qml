@@ -3,15 +3,31 @@ import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.3
 
-
 ApplicationWindow {
     id: mainWindow
     objectName: "mainWindow"
     visible: true
-    width: 500
+    width: 700
     height: 700
     title: "Spectrum"
 
+    SpectrumView{
+        id: spectrView
+
+        anchors.fill: parent
+        width: 500
+        height: 400
+
+        Component.onCompleted: {
+            context = DataContainerContext
+        }
+
+        Connections{
+            target: DBConnector
+            onConnectionStatusChanged : spectrView.updateContext(val)
+        }
+
+    }
 
     style: ApplicationWindowStyle {
            background: BorderImage {
@@ -22,25 +38,9 @@ ApplicationWindow {
     Action{
         id: connectDBAct
         text: "Connect"
-        iconSource: "icons/connect.png"
+        iconSource: "/resources/icons/connect-your-database.png"
         onTriggered:
             connectorView.visible = true;            
-    }
-
-    Action{
-        id: disconnectDBAct
-        text: "Disconnect"
-        enabled: false
-        onTriggered: {
-            ConnectionData.doDisconnect();
-            disconnectDBAct.enabled = false;
-        }
-    }
-    Connections{
-        target: connectorView
-        onConnected: {
-            disconnectDBAct.enabled = true;
-        }
     }
 
     menuBar: MenuBar{
@@ -51,9 +51,6 @@ ApplicationWindow {
 
             MenuItem {
                 action: connectDBAct
-            }
-            MenuItem {
-                action: disconnectDBAct
             }
         }
     }
@@ -78,6 +75,18 @@ ApplicationWindow {
                 id: sbLabel
                 text: "Start working with connect to Database"
             }
+        }       
+    }
+
+    Connections{
+        target: DBConnector
+        onConnectionStatusChanged : {
+            if (val){
+                statusBar.text = "Connected"
+            }
+            else{
+                statusBar.text = "Connection failed"
+            }
         }
     }
 
@@ -86,36 +95,43 @@ ApplicationWindow {
         objectName: "connectorView"
         visible: false;
 
-        signal connected();
-
         function setValuesToDef(){
-            host = ConnectionData.Host;
-            port = ConnectionData.Port;
-            dbName = ConnectionData.Database;
-            user = ConnectionData.User;
-            password = ConnectionData.Password;
+            host = DBConnector.Host;
+            port = DBConnector.Port;
+            dbName = DBConnector.Database;
+            user = DBConnector.User;
+            password = DBConnector.Password;
         }
 
         onAccepted: {
-            ConnectionData.Host = host;
-            ConnectionData.Port = port;
-            ConnectionData.Database = dbName;
-            ConnectionData.User = user;
-            ConnectionData.Password = password;
-
-            if (ConnectionData.doConnect()){
-                connected();
-                statusBar.text = "Connected"
-            }
-            else{
-                statusBar.text = "Connection failed"
-            }
+            DBConnector.Host = host;
+            DBConnector.Port = port;
+            DBConnector.Database = dbName;
+            DBConnector.User = user;
+            DBConnector.Password = password;
+            DBConnector.tryConnect();
         }
 
         onVisibleChanged: {
             if (visible){
                 setValuesToDef();
             }
+        }
+    }
+
+    BusyIndicator{
+        id: mainBzIndicator
+        anchors.centerIn: parent
+        running: false
+    }
+    Connections{
+        target: ApplicationContext
+        onStartBusy:
+        {
+            mainBzIndicator.running = true
+        }
+        onFinishBusy: {
+            mainBzIndicator.running = false
         }
     }
 
