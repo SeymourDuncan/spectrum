@@ -15,6 +15,18 @@ QString DBEntity::GetName(){
     return m_sName;
 }
 
+void DataModel::SelectSystem(int index){
+    m_dSelSys = index;
+}
+
+void DataModel::SelectClass(int index){
+    m_dSelClass = index;
+}
+
+void DataModel::SelectObject(int index){
+    m_dSelObj = index;
+}
+
 QStringList DataModel::GetSystemList(){
     QStringList lst;
 
@@ -30,9 +42,11 @@ QStringList DataModel::GetSystemList(){
     return lst;
 }
 
-QStringList DataModel::GetClassesBySystem(int index){
-    m_dSelSys = index;
+QStringList DataModel::GetClassesBySystem(){
     QStringList lst;
+
+    if (m_dSelSys < 0)
+        return lst;
 
     auto sv = GetSystemVector();
 
@@ -52,9 +66,11 @@ QStringList DataModel::GetClassesBySystem(int index){
     return lst;
 }
 
-QStringList DataModel::GetObjectsByClass(int index){
-    m_dSelClass = index;
+QStringList DataModel::GetObjectsByClass(){
     QStringList lst;
+
+    if ((m_dSelSys < 0) || (m_dSelClass < 0))
+        return lst;
 
     auto sv = GetSystemVector();
 
@@ -75,6 +91,34 @@ QStringList DataModel::GetObjectsByClass(int index){
         }
     }
     return lst;
+}
+
+QSpectrumValuesModel* DataModel::GetSpectrumValuesModel(){
+    if ((m_dSelSys < 0) || (m_dSelClass < 0)  || (m_dSelObj < 0))
+        return nullptr;
+
+    auto sv = GetSystemVector();
+
+    if (sv.size() == 0)
+        return nullptr;
+
+    auto system = sv.at(m_dSelSys);
+
+    auto clv = system->GetClassVector();
+    if (clv.size() == 0)
+        return nullptr;
+
+    auto cl = clv.at(m_dSelClass);
+
+    auto objs = cl->GetObjVector();
+    if (objs.size() == 0)
+        return nullptr;
+
+    SpectrumObject* obj = objs.at(m_dSelObj);
+
+    auto model = obj->GetModel();
+
+    return model;
 }
 
 bool DataModel::LoadData(){
@@ -105,9 +149,8 @@ bool DataModel::LoadData(){
 
 SpectrumSystemVector DataModel::GetSystemVector(){
     if (!m_bIsLoaded){
-        LoadData();        
+        m_bIsLoaded = LoadData();
     }
-    m_bIsLoaded = true;
 
     return m_vSpectrSystem;
 }
@@ -140,10 +183,8 @@ bool SpectrumSystem::LoadData(){
 
 SpectrumClassVector SpectrumSystem::GetClassVector(){
     if (!m_bIsLoaded){
-        LoadData();
-        m_bIsLoaded = true;
+        m_bIsLoaded = LoadData();
     }
-
     return m_vSpectrClass;
 }
 
@@ -177,14 +218,58 @@ bool SpectrumClass::LoadData(){
 
 SpectrumObjectVector SpectrumClass::GetObjVector(){
     if (!m_bIsLoaded){
-        LoadData();
-        m_bIsLoaded = true;
+        m_bIsLoaded = LoadData();
     }
 
     return m_vSpectrObj;
 }
 
-bool SpectrumObject::LoadData(){
+double SpectrumObject::GetKByL(const double K){
+    return K;
+}
+
+QSpectrumValuesModel* SpectrumObject::GetModel(){
+    if (!m_bIsLoaded){
+        m_bIsLoaded = m_pModel->LoadData(GetID());
+    }
+
+    return m_pModel;
+}
+
+//
+
+int QSpectrumValuesModel::rowCount(const QModelIndex &parent) const{
+    return m_vL.size();
+}
+
+QVariant QSpectrumValuesModel::data(const QModelIndex &index, int role) const{
+    if (!index.isValid()) {
+        return QVariant();
+    }
+
+    int idx = index.row();
+    switch (role) {
+    case ValueLRole:
+        return m_vL.at(idx);
+    case ValueKRole:
+        return m_vK.at(idx);
+    default:
+        return QVariant();
+    }
+}
+
+QHash<int, QByteArray> QSpectrumValuesModel::roleNames() const{
+    QHash<int, QByteArray> roles = QAbstractListModel::roleNames();
+    roles[ValueLRole] = "valueL";
+    roles[ValueKRole] = "valueK";
+
+    return roles;
+}
+
+bool QSpectrumValuesModel::LoadData(const int objId){
+    m_vL.clear();
+    m_vK.clear();
+
     if(!QSqlDatabase::contains(ConstantsHelper::CONNECTION_NAME)){
         return false;
     }
@@ -193,7 +278,7 @@ bool SpectrumObject::LoadData(){
     QSqlQuery query(db);
 
     query.prepare(ConstantsHelper::SELECT_SPECTRUM_QUERY);
-    query.bindValue(":object_id", GetID());
+    query.bindValue(":object_id", objId);
 
     if (!query.exec()){
         return false;
@@ -209,12 +294,12 @@ bool SpectrumObject::LoadData(){
         k = query.value(rec.indexOf("K")).toDouble();
         m_vL.push_back(l);
         m_vK.push_back(k);
-        m_dCount++;
+        //m_dqCount++;
     }
 
     return true;
 }
 
-double SpectrumObject::GetKByL(const double K){
-    return K;
+QSpectrumValuesModel::QSpectrumValuesModel(QObject *parent): QAbstractListModel(parent){
+
 }

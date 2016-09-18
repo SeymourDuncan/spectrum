@@ -5,10 +5,12 @@
 #include "modeldata.h"
 #include <memory>
 #include <QStringList>
+#include <QAbstractListModel>
 
 class SpectrumObject;
 class SpectrumClass;
 class SpectrumSystem;
+class QSpectrumValuesModel;
 
 typedef std::vector<SpectrumObject*> SpectrumObjectVector;
 typedef std::vector<SpectrumClass*> SpectrumClassVector;
@@ -26,14 +28,23 @@ public:
     }
 private:
     bool m_bIsLoaded;
+
     int m_dSelSys;
     int m_dSelClass;
     int m_dSelObj;
     SpectrumSystemVector m_vSpectrSystem;
 public:
+    // получение моделей
     Q_INVOKABLE QStringList GetSystemList();
-    Q_INVOKABLE QStringList GetClassesBySystem(int index);
-    Q_INVOKABLE QStringList GetObjectsByClass(int index);
+    Q_INVOKABLE QStringList GetClassesBySystem();
+    Q_INVOKABLE QStringList GetObjectsByClass();
+
+    // выделение
+    Q_INVOKABLE void SelectSystem(int index);
+    Q_INVOKABLE void SelectClass(int index);
+    Q_INVOKABLE void SelectObject(int index);
+
+    Q_INVOKABLE QSpectrumValuesModel* GetSpectrumValuesModel();
 public:
      bool LoadData();
      SpectrumSystemVector GetSystemVector();
@@ -88,24 +99,47 @@ public:
     SpectrumObjectVector GetObjVector();
 };
 
+class QSpectrumValuesModel: public QAbstractListModel
+{
+    Q_OBJECT
 
+public:
+    enum Roles {
+        ValueLRole = Qt::UserRole + 1,
+        ValueKRole
+    };
+
+    std::vector<double> m_vL;
+    std::vector<double> m_vK;
+
+    QSpectrumValuesModel(QObject *parent = 0);
+
+    virtual int rowCount(const QModelIndex &parent) const;
+    virtual QVariant data(const QModelIndex &index, int role) const;
+    virtual QHash<int, QByteArray> roleNames() const;
+
+    bool LoadData(const int objId);
+    //Q_INVOKABLE void add();
+
+//private:
+//    int m_dqCount;
+};
+
+//
 class SpectrumObject: public DBEntity{
     Q_OBJECT
 public:
     SpectrumObject(const int id, const QString name, QObject* parent = nullptr)
         : DBEntity(id, name, parent), m_bIsLoaded(false)
     {
-
+        m_pModel = new QSpectrumValuesModel(this);
     }
 private:    
-    int m_dCount;
     bool m_bIsLoaded  = false;
-    std::vector<double> m_vL;
-    std::vector<double> m_vK;
+    QSpectrumValuesModel* m_pModel;
 public:
-    bool LoadData();
+    QSpectrumValuesModel* GetModel();
     double GetKByL(const double K);
 };
-
 
 #endif // MODELDATA_H

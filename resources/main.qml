@@ -27,8 +27,6 @@ ApplicationWindow {
             onConnectionStatusChanged : spectrView.updateContext(val)
         }
 
-
-
     }
 
     style: ApplicationWindowStyle {

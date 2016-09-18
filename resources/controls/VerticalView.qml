@@ -26,7 +26,7 @@ Item {
                     width: cellWidth
                     height: cellHeight
                     Text {
-                        text: value1
+                        text: valueL
                         anchors.centerIn: parent
                     }
                  }
@@ -35,8 +35,10 @@ Item {
                     radius: 0
                     width: cellWidth
                     height: cellHeight
+                    clip: true
                     Text {
-                        text: value2
+                        text: valueK.toFixed(1)
+                        clip: true
                         anchors.centerIn: parent
                     }
                  }

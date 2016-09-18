@@ -1,10 +1,16 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
+import com.types.datamodel 1.0
 import "controls"
 
 Item {
     property var context: null
+    // сам объект контекста всегда один и тот же
+    // onUpdateContext вызывается при переподключении
+    // т.к. нужно обновить модели
+
+    // по сути контекст должен полностью управлять вьюшкой
     signal updateContext(bool val);
 
     onUpdateContext: {
@@ -12,11 +18,26 @@ Item {
             return;
         if (val){
             cbSystem.model = context.GetSystemList()
+            cbSystem.currentIndex = 0;
             cbSystem.activated(0);
         }
         else{
-            cbSystem.currentIndex = -1
+            // QMLFUN. Сналача нужно нулить модель, а только потом выставлять
+            // индексы в -1. Потому что если надоборот, то сначала сделаем
+            // индекс и текст -1 и '', а при зануление получится 0 и ''.
+            // И если далее дать модель, то выйдет что первый элемент УЖЕ выбран,
+            // и текст у него ''.
+            // А вот еще:
+            // Changing the model after initialization will reset currentIndex to 0.
+            // Разгадал загадку!! Всю сука субботу разгадывал.
+            // "Changing" не случается если элементы в модели не поменялись!!!
             cbSystem.model = null
+            cbClass.model = null
+            cbObject.model = null
+
+            cbSystem.currentIndex = -1
+            cbClass.currentIndex = -1
+            cbObject.currentIndex = -1
         }
 
     }
@@ -62,6 +83,9 @@ Item {
                     ComboBox{
                         id: cbSystem
                         height: 25
+                        onActivated:{
+                            context.SelectSystem(index);
+                        }
                     }
                     Label{
                         text: "Class:"
@@ -70,14 +94,29 @@ Item {
                     ComboBox{
                         id: cbClass
                         height: 25
+                        onActivated:{
+                            context.SelectClass(index);
+                        }
+
+                        onCurrentIndexChanged:{
+                            console.log(currentIndex);
+                        }
+
+                        onModelChanged: {
+//                            console.log(model);
+//                            for (var key in model){
+//                                console.log(key)
+//                            }
+                        }
                         Connections{
                             target: cbSystem
                             onActivated:{
                                 cbClass.currentIndex = -1
-                                cbClass.model = context.GetClassesBySystem(index);
-                                cbClass.activated(0);
+                                cbClass.model = context.GetClassesBySystem();
+                                cbClass.activated(cbClass.currentIndex);
                             }
                         }
+
                     }
                     Label{
                         text: "Object:"
@@ -87,11 +126,15 @@ Item {
                     ComboBox{
                         id: cbObject
                         height: 25
+                        onActivated:{
+                            context.SelectObject(index);
+                        }
                         Connections{
                             target: cbClass
                             onActivated:{
                                 cbObject.currentIndex = -1
-                                cbObject.model = context.GetObjectsByClass(index);
+                                cbObject.model = context.GetObjectsByClass();
+                                cbObject.activated(cbObject.index);
                             }
                         }
                     }
@@ -100,7 +143,6 @@ Item {
 
             // таблица со значениями
             GroupBox{
-//                title: height + ':' + implicitHeight
                 title: "Values table"
                 Layout.fillWidth: true
                 Layout.columnSpan: 1
@@ -116,18 +158,25 @@ Item {
                 // иначе хз как.
                 height: layers.height
                 VerticalView{
-                    id: vertView
+                    id: vertView                     
                     anchors.topMargin: 5
                     headerText1: "X"
                     headerText2: "Y"
                     anchors.fill: parent
+
+                    // поменялся выбранный объект
+                    Connections{
+                        target: cbObject
+                        onActivated:{
+                            vertView.model = context.GetSpectrumValuesModel();
+                        }
+                    }
                 }
             }
 
             // графики
             GroupBox{
                 id: gbCharts
-//                title: height + ':' + implicitHeight
                 title: "Charts"
 
                 Layout.fillHeight: true
