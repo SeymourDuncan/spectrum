@@ -6,6 +6,7 @@ MyApplication::MyApplication(int& argc, char** argv,
             const QString& strOrg, const QString strAppname)
             : QApplication(argc, argv), m_pSettings(0), m_bDataLoaded(false){
 
+
     setOrganizationName(strOrg);
     setApplicationName(strAppname);
     // инициализируем объект настроек. TODO: менеджер настроек?
@@ -69,8 +70,11 @@ void MyApplication::SetDefaultContext(){
     m_pEngine->rootContext()->setContextProperty("DBConnector", m_pDBConnector);
 // для вызова startBuzy
     m_pEngine->rootContext()->setContextProperty("ApplicationContext", this);
-//  данные из БД
+//  получение данных из БД
     m_pEngine->rootContext()->setContextProperty("DataContainerContext", m_pModel);
+//  загрузчик в БД
+    m_pEngine->rootContext()->setContextProperty("DataLoader", m_pModel->GetDataLoader());
+
 }
 
 void MyApplication::SetQmlEngine(QQmlApplicationEngine* engine){

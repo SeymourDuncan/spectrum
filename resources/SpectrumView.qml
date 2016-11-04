@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
 import com.types.datamodel 1.0
+import QtCharts 2.0
 import "controls"
 
 Item {
@@ -13,6 +14,7 @@ Item {
     // по сути контекст должен полностью управлять вьюшкой
     signal updateContext(bool val);
 
+    // TODO при переподключении нужно обновлять модель как бы
     onUpdateContext: {
         if (!context)
             return;
@@ -84,7 +86,7 @@ Item {
                         id: cbSystem
                         height: 25
                         onActivated:{
-                            context.SelectSystem(index);
+                            context.SelectSystem(index);                            
                         }
                     }
                     Label{
@@ -98,21 +100,11 @@ Item {
                             context.SelectClass(index);
                         }
 
-                        onCurrentIndexChanged:{
-                            console.log(currentIndex);
-                        }
-
-                        onModelChanged: {
-//                            console.log(model);
-//                            for (var key in model){
-//                                console.log(key)
-//                            }
-                        }
                         Connections{
                             target: cbSystem
                             onActivated:{
                                 cbClass.currentIndex = -1
-                                cbClass.model = context.GetClassesBySystem();
+                                cbClass.model = context.GetClassList();
                                 cbClass.activated(cbClass.currentIndex);
                             }
                         }
@@ -133,7 +125,7 @@ Item {
                             target: cbClass
                             onActivated:{
                                 cbObject.currentIndex = -1
-                                cbObject.model = context.GetObjectsByClass();
+                                cbObject.model = context.GetObjectList();
                                 cbObject.activated(cbObject.index);
                             }
                         }
@@ -177,8 +169,8 @@ Item {
             // графики
             GroupBox{
                 id: gbCharts
-                title: "Charts"
-
+//                title: implicitWidth + ' ' + implicitHeight
+//                title: Layout.preferredWidth + ' ' + Layout.preferredHeight
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 Layout.columnSpan: 2
@@ -186,11 +178,70 @@ Item {
                 Layout.row: 2
 
                 // та же история что и у значений
-                implicitWidth: 50
+//                Layout.preferredWidth:  50
+//                Layout.preferredHeight: 0
 
-                Rectangle{
-                    color: "plum"
+//                Rectangle{
+//                    color: "plum"
+//                    anchors.fill: parent
+//                }
+                implicitHeight: 50;
+                implicitWidth: 50;
+
+                ChartView {
+                    id: mainChart
+//                    title: "Line"
+                    // если пустой, то растягивается, но без шкалы
                     anchors.fill: parent
+                    antialiasing: true
+                    legend.visible: false
+
+                    property real xMax: 300;
+                    property real yMax: 300
+
+                    ValueAxis {
+                        id: axisX
+                        min: 0
+                        max: mainChart.xMax
+                        tickCount: 5
+                    }
+
+                    ValueAxis {
+                        id: axisY
+                        min: 0
+                        max: mainChart.yMax
+                    }
+
+                    LineSeries {
+                        id: lineSeries
+                        name: "Current spectrum"
+
+                        axisX: axisX
+                        axisY: axisY
+                    }
+
+                    Connections{
+                        target: cbObject
+                        onActivated:{
+                            lineSeries.clear();
+                            var lvalues = context.GetLVector();
+                            var kvalues = context.GetKVector();
+
+                            mainChart.legend.visible = lvalues.length > 0
+
+                            var xmax = 0;
+                            var ymax = 0;
+                            for (var i = 0; i < lvalues.length; ++i){
+//                                console.log(lvalues[i]);
+//                                console.log(kvalues[i]);
+                                lineSeries.append(lvalues[i], kvalues[i])
+                                xmax = (xmax < lvalues[i]) ? lvalues[i] : xmax;
+                                ymax = (ymax < kvalues[i]) ? kvalues[i] : ymax
+                            }
+                            mainChart.xMax = xmax + 0.1 * xmax ;
+                            mainChart.yMax = ymax + 0.1 * ymax ;
+                        }
+                    }
                 }
             }
 

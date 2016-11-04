@@ -2,6 +2,7 @@ import QtQuick 2.7
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.3
+import "loader"
 
 ApplicationWindow {
     id: mainWindow
@@ -10,6 +11,25 @@ ApplicationWindow {
     width: 700
     height: 700
     title: "Spectrum"
+
+    // global var for some dyn created components
+    property var component;
+    property var loader;
+
+    function finishLoaderCreation(){
+        if (component.status == Component.Ready) {
+               loader = component.createObject(mainWindow);
+               if (loader == null) {
+                   console.log("Error creating object");
+               }
+               else{
+                   loader.modality = Qt.WindowModal;
+                   loader.show();
+               }
+           } else if (component.status == Component.Error) {
+               console.log("Error loading component:", component.errorString());
+        }
+    }
 
     SpectrumView{
         id: spectrView
@@ -26,7 +46,6 @@ ApplicationWindow {
             target: DBConnector
             onConnectionStatusChanged : spectrView.updateContext(val)
         }
-
     }
 
     style: ApplicationWindowStyle {
@@ -43,6 +62,20 @@ ApplicationWindow {
             connectorView.visible = true;            
     }
 
+    Action{
+        id: loaderAct
+        text: "Loader"
+        iconSource: "/resources/icons/loadSpectrums.png"
+        onTriggered:
+        {
+            component = Qt.createComponent("loader/loaderWindow.qml", Component.Asynchronous);
+            if (component.status == Component.Ready)
+                finishLoaderCreation();
+            else
+                component.statusChanged.connect(finishLoaderCreation);
+        }
+    }
+
     menuBar: MenuBar{
         Menu{
             id: dbMenu
@@ -52,6 +85,9 @@ ApplicationWindow {
             MenuItem {
                 action: connectDBAct
             }
+            MenuItem {
+                action: loaderAct
+            }
         }
     }
 
@@ -60,6 +96,9 @@ ApplicationWindow {
             spacing: 5
             ToolButton {
                 action: connectDBAct
+            }
+            ToolButton {
+                action: loaderAct
             }
         }
     }
@@ -111,7 +150,6 @@ ApplicationWindow {
             DBConnector.Password = password;
             DBConnector.tryConnect();
         }
-
         onVisibleChanged: {
             if (visible){
                 setValuesToDef();

@@ -8,7 +8,8 @@ SOURCES += main.cpp \
     connector.cpp \
     constanthelper.cpp \
     modeldata.cpp \
-    dbthread.cpp
+    dbthread.cpp \
+    dataloader.cpp
 
 
 RESOURCES += qml.qrc
@@ -26,6 +27,14 @@ HEADERS += \
     connector.h \
     constanthelper.h \
     modeldata.h \
-    dbthread.h
+    dbthread.h \
+    dataloader.h
 
 
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../CoreDataPlugin/release/ -lCoreDataPlugin
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../CoreDataPlugin/debug/ -lCoreDataPlugin
+else:unix: LIBS += -L$$PWD/../CoreDataPlugin/ -lCoreDataPlugin
+
+INCLUDEPATH += $$PWD/../CoreDataPlugin/debug
+DEPENDPATH += $$PWD/../CoreDataPlugin/debug

@@ -6,7 +6,7 @@ Item {
     height: cellHeight * 2 + 18
     property alias model: gvTable.model
 
-    property int cellWidth: 30
+    property int cellWidth: 40
     property int cellHeight: 30
 
     property int count: gvTable.count

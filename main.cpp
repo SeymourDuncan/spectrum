@@ -11,11 +11,10 @@ int main(int argc, char *argv[])
     app.SetQmlEngine(engine);
 
     qmlRegisterType<QSpectrumValuesModel>("com.types.datamodel", 1, 0, "SpectrumValuesModel");
+
     engine->load(QUrl(QStringLiteral("qrc:/resources/main.qml")));
 
     app.Init();
-
-
 
     return app.exec();
 }

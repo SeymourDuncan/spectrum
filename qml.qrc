@@ -3,9 +3,11 @@
         <file>resources/controls/TextItemBorder.qml</file>
         <file>resources/controls/VerticalView.qml</file>
         <file>resources/icons/connect-your-database.png</file>
-        <file>resources/icons/title.png</file>
         <file>resources/ConnectorView.qml</file>
         <file>resources/main.qml</file>
         <file>resources/SpectrumView.qml</file>
+        <file>resources/loader/loaderWindow.qml</file>
+        <file>resources/icons/loadSpectrums.png</file>
+        <file>resources/controls/CustomBorder.qml</file>
     </qresource>
 </RCC>

@@ -1,5 +1,6 @@
 #include "modeldata.h"
 #include "constanthelper.h"
+
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
@@ -15,16 +16,54 @@ QString DBEntity::GetName(){
     return m_sName;
 }
 
+DataModel::DataModel(QObject* parent): QObject(parent), m_bIsLoaded(false),
+        m_dSelSys(-1), m_dSelClass(-1), m_dSelObj(-1)
+{
+    m_pDataLoader = new DataLoader(this);
+}
+
+DataLoader* DataModel::GetDataLoader(){
+    return m_pDataLoader;
+}
+
 void DataModel::SelectSystem(int index){
     m_dSelSys = index;
+    m_pSelSys = nullptr;
+
+    auto sv = GetSystemVector();
+    if (sv.size() <= m_dSelSys)
+        return;
+
+    m_pSelSys = sv.at(m_dSelSys);
 }
 
 void DataModel::SelectClass(int index){
     m_dSelClass = index;
+    m_pSelClass = nullptr;
+
+    if (!m_pSelSys)
+        return;
+
+    auto cv = m_pSelSys->GetClassVector();
+    if (cv.size() <= m_dSelClass)
+        return;
+
+    m_pSelClass = cv.at(m_dSelClass);
+
 }
 
 void DataModel::SelectObject(int index){
     m_dSelObj = index;
+    m_pSelObj = nullptr;
+
+    if (!m_pSelClass)
+        return;
+
+    auto ov = m_pSelClass->GetObjVector();
+    if (ov.size() <= m_dSelObj)
+        return;
+
+    m_pSelObj = ov.at(m_dSelObj);
 }
 
 QStringList DataModel::GetSystemList(){
@@ -35,90 +74,67 @@ QStringList DataModel::GetSystemList(){
     if (sv.size() == 0)
         return lst;
 
-    for(auto sys: GetSystemVector()){
+    for(auto sys: sv){
         lst.append(sys->GetName());
     }
 
     return lst;
 }
 
-QStringList DataModel::GetClassesBySystem(){
+QStringList DataModel::GetClassList(){
     QStringList lst;
 
-    if (m_dSelSys < 0)
+    if (!m_pSelSys)
         return lst;
 
-    auto sv = GetSystemVector();
+    auto clv = m_pSelSys->GetClassVector();
 
-    if (sv.size() == 0)
-        return lst;
-
-    auto system = sv.at(m_dSelSys);
-
-    if (system){
-        auto clv = system->GetClassVector();
-
-        for(auto cl: clv){
-            lst.append(cl->GetName());
-        }
+    for(auto cl: clv){
+        lst.append(cl->GetName());
     }
 
     return lst;
 }
 
-QStringList DataModel::GetObjectsByClass(){
+QStringList DataModel::GetObjectList(){
     QStringList lst;
 
-    if ((m_dSelSys < 0) || (m_dSelClass < 0))
+    if (!m_pSelClass)
         return lst;
 
-    auto sv = GetSystemVector();
-
-    if (sv.size() == 0)
-        return lst;
-
-    auto system = sv.at(m_dSelSys);
-
-    auto clv = system->GetClassVector();
-    if (clv.size() == 0)
-        return lst;
-
-    auto cl = clv.at(m_dSelClass);
-    if (cl){
-        auto objs = cl->GetObjVector();
-        for(auto obj: objs){
-            lst.append(obj->GetName());
-        }
+    auto ov = m_pSelClass->GetObjVector();
+    for(auto obj: ov){
+        lst.append(obj->GetName());
     }
+
     return lst;
 }
 
 QSpectrumValuesModel* DataModel::GetSpectrumValuesModel(){
-    if ((m_dSelSys < 0) || (m_dSelClass < 0)  || (m_dSelObj < 0))
+    if (!m_pSelObj)
         return nullptr;
 
-    auto sv = GetSystemVector();
-
-    if (sv.size() == 0)
-        return nullptr;
-
-    auto system = sv.at(m_dSelSys);
-
-    auto clv = system->GetClassVector();
-    if (clv.size() == 0)
-        return nullptr;
-
-    auto cl = clv.at(m_dSelClass);
-
-    auto objs = cl->GetObjVector();
-    if (objs.size() == 0)
-        return nullptr;
-
-    SpectrumObject* obj = objs.at(m_dSelObj);
-
-    auto model = obj->GetModel();
+    auto model = m_pSelObj->GetModel();
 
     return model;
+}
+
+QVector<qreal> DataModel::GetLVector(){
+    QVector<qreal> res;
+
+    if (!m_pSelObj)
+        return res;
+
+    return m_pSelObj->GetModel()->GetLVector();
+}
+
+QVector<qreal> DataModel::GetKVector(){
+    QVector<qreal> res;
+
+    if (!m_pSelObj)
+        return res;
+
+    return m_pSelObj->GetModel()->GetKVector();
 }
 
 bool DataModel::LoadData(){
@@ -130,8 +146,8 @@ bool DataModel::LoadData(){
 
     QSqlQuery query(db);
 
-    qDebug()<<ConstantsHelper::SELECT_SYSTEMS_QUERY;
-    if (!query.exec(ConstantsHelper::SELECT_SYSTEMS_QUERY)){
+    qDebug()<<ConstantsHelper::SELECT_ALL_SYSTEMS_QUERY;
+    if (!query.exec(ConstantsHelper::SELECT_ALL_SYSTEMS_QUERY)){
         return false;
     };
 
@@ -302,4 +318,12 @@ bool QSpectrumValuesModel::LoadData(const int objId){
 
 QSpectrumValuesModel::QSpectrumValuesModel(QObject *parent): QAbstractListModel(parent){
 
+}
+
+QVector<qreal> QSpectrumValuesModel::GetLVector(){
+    return m_vL;
+}
+
+QVector<qreal> QSpectrumValuesModel::GetKVector(){
+    return m_vK;
 }
